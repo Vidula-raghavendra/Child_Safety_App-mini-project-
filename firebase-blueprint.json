@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and linking status.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["child", "parent"] },
+        "linkedUid": { "type": "string", "description": "UID of the linked child or parent." },
+        "linkingCode": { "type": "string", "description": "Temporary code for parent to link with child." },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastKnownLocation": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "locationUpdatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Report": {
+      "title": "Safety Report",
+      "description": "Report of an unsafe situation submitted by a child.",
+      "type": "object",
+      "properties": {
+        "reportId": { "type": "string" },
+        "childUid": { "type": "string" },
+        "parentUid": { "type": "string" },
+        "description": { "type": "string" },
+        "safetyFeedback": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["childUid", "parentUid", "description", "createdAt"]
+    },
+    "SOSAlert": {
+      "title": "SOS Alert",
+      "description": "Emergency alert triggered by a child.",
+      "type": "object",
+      "properties": {
+        "alertId": { "type": "string" },
+        "childUid": { "type": "string" },
+        "parentUid": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "status": { "type": "string", "enum": ["active", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["childUid", "parentUid", "location", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles indexed by UID."
+    },
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Safety reports accessible by involved child and parent."
+    },
+    "/sos_alerts/{alertId}": {
+      "schema": "SOSAlert",
+      "description": "Emergency alerts accessible by involved child and parent."
+    }
+  }
+}

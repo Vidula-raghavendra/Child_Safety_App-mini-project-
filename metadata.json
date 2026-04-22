@@ -1,5 +1,5 @@
 {
-  "name": "SafeNest – AI-Based Child Safety",
-  "description": "A comprehensive child safety application with SOS alerts, unsafe situation reporting, and AI-powered user detection.",
+  "name": "SafeNest – Smart Child Safety",
+  "description": "A comprehensive child safety application with SOS alerts, emergency reporting, and behavioral safety monitoring.",
   "requestFramePermissions": ["geolocation"]
 }

@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Catch-all deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 1. User Profiles
+    match /users/{uid} {
+      allow get: if isOwner(uid) || (isSignedIn() && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedUid == uid));
+      allow list: if isSignedIn() && (
+        // Allow querying for a parent by linking code
+        (request.query.limit <= 1 && request.query.filters.size() >= 1)
+      );
+      allow create: if isOwner(uid) 
+        && incoming().uid == uid
+        && incoming().email is string
+        && incoming().role in ['child', 'parent']
+        && incoming().createdAt == request.time;
+      allow update: if (isOwner(uid)
+        && incoming().email == existing().email
+        && incoming().role == existing().role
+        && (
+          // Action: Link (Self)
+          (incoming().diff(existing()).affectedKeys().hasOnly(['linkedUid', 'linkingCode']))
+          || (incoming().diff(existing()).affectedKeys().hasOnly(['displayName']))
+          || (incoming().diff(existing()).affectedKeys().hasOnly(['lastKnownLocation', 'locationUpdatedAt']))
+        )) || (
+          // Action: External Link (Child linking to Parent)
+          isSignedIn() && 
+          existing().role == 'parent' &&
+          (!('linkedUid' in existing()) || existing().linkedUid == "" || existing().linkedUid == null) &&
+          incoming().linkedUid == request.auth.uid &&
+          incoming().linkingCode == "" && // Clear the code after linking
+          existing().linkingCode != "" &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['linkedUid', 'linkingCode'])
+        );
+    }
+
+    // 2. Safety Reports
+    match /reports/{reportId} {
+      function canAccessReport() {
+        return isSignedIn() && (
+          isOwner(existing().childUid) || isOwner(existing().parentUid)
+        );
+      }
+
+      allow get: if canAccessReport();
+      allow list: if isSignedIn() && (resource.data.childUid == request.auth.uid || resource.data.parentUid == request.auth.uid);
+      
+      allow create: if isSignedIn() 
+        && isOwner(incoming().childUid)
+        && incoming().createdAt == request.time
+        && incoming().description is string && incoming().description.size() <= 2000
+        && exists(/databases/$(database)/documents/users/$(incoming().parentUid));
+      
+      allow update: if isSignedIn() 
+        && isOwner(existing().parentUid)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'safetyFeedback'])
+        && incoming().status in ['pending', 'reviewed'];
+    }
+
+    // 3. SOS Alerts
+    match /sos_alerts/{alertId} {
+      function canAccessAlert() {
+        return isSignedIn() && (
+          isOwner(existing().childUid) || isOwner(existing().parentUid)
+        );
+      }
+
+      allow get: if canAccessAlert();
+      allow list: if isSignedIn() && (resource.data.childUid == request.auth.uid || resource.data.parentUid == request.auth.uid);
+      
+      allow create: if isSignedIn() 
+        && isOwner(incoming().childUid)
+        && incoming().createdAt == request.time
+        && incoming().location.lat is number
+        && incoming().location.lng is number
+        && (incoming().parentUid == 'parent_demo_uid' || exists(/databases/$(database)/documents/users/$(incoming().parentUid)));
+      
+      allow update: if isSignedIn()
+        && (isOwner(existing().childUid) || isOwner(existing().parentUid))
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+        && incoming().status in ['active', 'resolved'];
+    }
+  }
+}

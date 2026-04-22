@@ -27,8 +27,8 @@ async function startServer() {
 
   app.post("/api/predict_user_type", (req, res) => {
     const { pressure, speed, duration } = req.body;
-    // Simple heuristic simulating the ML model
-    // Children often have lighter pressure or different swipe patterns
+    // Heuristic processing for user identification
+    // Behavioral patterns often differ by age groups
     const isChild = pressure < 0.5 || speed > 1000; 
     res.json({ userType: isChild ? "Child" : "Adult" });
   });

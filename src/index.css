@@ -1,1 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  
+  --radius-ios: 2rem;
+  --radius-ios-lg: 2.5rem;
+  --radius-ios-xl: 3.5rem;
+  
+  --shadow-ios: 0 10px 30px -10px rgba(0,0,0,0.1);
+  --shadow-ios-heavy: 0 40px 80px -20px rgba(0,0,0,0.15);
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  .ios-shadow {
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+  }
+  .ios-shadow-heavy {
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.2);
+  }
+  .glass-nav {
+    @apply bg-white/80 backdrop-blur-xl border-t border-slate-100;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-100;
+  }
+  .sos-glow {
+    filter: drop-shadow(0 0 20px rgba(225, 29, 72, 0.4));
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
