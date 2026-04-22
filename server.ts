@@ -12,25 +12,13 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API Routes
-  app.post("/api/send_sos", (req, res) => {
-    const { userId, location } = req.body;
-    console.log(`SOS Alert from ${userId} at ${JSON.stringify(location)}`);
-    res.json({ success: true, alertId: Date.now().toString() });
-  });
-
-  app.post("/api/submit_report", (req, res) => {
-    const { userId, description } = req.body;
-    console.log(`Report from ${userId}: ${description}`);
-    res.json({ success: true, reportId: Date.now().toString() });
-  });
-
-  app.post("/api/predict_user_type", (req, res) => {
-    const { pressure, speed, duration } = req.body;
-    // Heuristic processing for user identification
-    // Behavioral patterns often differ by age groups
-    const isChild = pressure < 0.5 || speed > 1000; 
-    res.json({ userType: isChild ? "Child" : "Adult" });
+  // Project Info API
+  app.get("/api/project_status", (req, res) => {
+    res.json({ 
+      status: "Active Development",
+      main_repo: "/flutter_app",
+      archive: "/react_web_archive"
+    });
   });
 
   // Vite middleware for development
@@ -49,7 +37,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Development Hub running on http://localhost:${PORT}`);
   });
 }
 

@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'services/firebase_service.dart';
+import 'services/gemini_service.dart';
 import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Supabase
-  // Replace with your actual project URL and Anon Key
-  await Supabase.initialize(
-    url: 'https://your-project-id.supabase.co',
-    anonKey: 'your-anon-key',
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  runApp(const SafeNestApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<FirebaseService>(create: (_) => FirebaseService()),
+        Provider<GeminiService>(create: (_) => GeminiService(apiKey: const String.fromEnvironment('GEMINI_API_KEY'))),
+      ],
+      child: const SafeNestApp(),
+    ),
+  );
 }
 
 class SafeNestApp extends StatelessWidget {
@@ -37,3 +46,4 @@ class SafeNestApp extends StatelessWidget {
     );
   }
 }
+

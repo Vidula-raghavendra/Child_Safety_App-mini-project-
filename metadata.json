@@ -1,5 +1,5 @@
 {
   "name": "SafeNest – Smart Child Safety",
-  "description": "A comprehensive child safety application with SOS alerts, emergency reporting, and behavioral safety monitoring.",
+  "description": "SafeNest Mobile: A native Flutter safety application with real-time Firebase monitoring, SOS alerts, and Gemini AI analysis. (Web Archive available)",
   "requestFramePermissions": ["geolocation"]
 }
