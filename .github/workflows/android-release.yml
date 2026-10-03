@@ -2,7 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main, ci/android-apk-release]
+    paths: ["flutter_app/**", ".github/workflows/android-release.yml"]
   workflow_dispatch:
 
 permissions:
@@ -39,9 +40,12 @@ jobs:
           path: flutter_app/build/app/outputs/flutter-apk/SafeNest.apk
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: SafeNest v1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
           files: flutter_app/build/app/outputs/flutter-apk/SafeNest.apk
           body: |
             SafeNest Android build. Install the APK on an Android phone (allow "install unknown apps" when prompted).
